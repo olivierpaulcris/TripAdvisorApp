@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { StyleSheet, View, Text } from "react-native";
 import { ListItem } from "react-native-elements";
 import OverlayOneInput from "../../Elements/OverlayOneInput";
+import OverlayTwoInputs from "../../Elements/OverlayTwoInputs";
 
 export default class UpdateUserInfo extends Component {
     constructor(props) {
@@ -34,7 +35,13 @@ export default class UpdateUserInfo extends Component {
                     iconColorRight: "#ccc",
                     iconNameLeft: "at",
                     iconColorLeft: "#ccc",
-                    onPress: () => console.log("click en cambiar email")
+                    onPress: () =>
+                        this.openOverlayTwoInputs(
+                            "Email",
+                            "Password",
+                            props.userInfo.email,
+                            this.updateUserEmail
+                        )
                 },
                 {
                     title: "Cambiar password",
@@ -66,6 +73,40 @@ export default class UpdateUserInfo extends Component {
                     placeholder={placeholder}
                     updateFunction={updateFunction}
                     inputValue={inputValue}
+                />
+            )
+        });
+    };
+
+    updateUserEmail = async (newEmail, password) => {
+        console.log("estamos en userInfo");
+        const emailOld = this.props.userInfo.email;
+
+        if (emailOld != newEmail) {
+            this.state.updateUserEmail(newEmail, password);
+        }
+
+        this.setState({
+            overlayComponent: null
+        });
+    };
+
+    openOverlayTwoInputs = (
+        placeholderOne,
+        placeholderTwo,
+        inputValueOne,
+        updateFunction
+    ) => {
+        this.setState({
+            overlayComponent: (
+                <OverlayTwoInputs
+                    isVisibleOverlay={true}
+                    placeholderOne={placeholderOne}
+                    placeholderTwo={placeholderTwo}
+                    inputValueOne={inputValueOne}
+                    inputValueTwo=""
+                    isPassword={true}
+                    updateFunction={updateFunction}
                 />
             )
         });

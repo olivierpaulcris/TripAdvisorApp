@@ -28,14 +28,19 @@ export default class UserInfo extends Component {
         });
     };
 
+    reauthenticate = currentPassword => {
+        const user = firebase.auth().currentUser;
+        const credentials = firebase
+            .auth()
+            .EmailAuthProvider.credentials(user.email, currentPassword);
+
+        return user.reauthenticateWithCredential(credentials);
+    };
+
     checkUserAvatar = photoURL => {
         return photoURL
             ? photoURL
             : "https://api.adorable.io/avatars/285/abott@adorable.png";
-    };
-
-    updateUserEmail = async (newEmail, newPassword) => {
-        console.log(newEmail, newPassword);
     };
 
     updateUserDisplayName = async newDisplayName => {
@@ -46,6 +51,23 @@ export default class UserInfo extends Component {
         await firebase.auth().currentUser.updateProfile(update);
 
         this.getUserInfo();
+    };
+
+    updateUserEmail = async (newEmail, password) => {
+        this.reauthenticate(password)
+            .then(() => {
+                const user = firebase.auth().currentUser;
+                user.updateEmail(newEmail)
+                    .then(() => {
+                        console.log("Email cambiado correctamente");
+                    })
+                    .catch(err => {
+                        console.log("error");
+                    });
+            })
+            .catch(err => {
+                console.log("tu contraseña no es correcta");
+            });
     };
 
     returnUpdateUserInfoComponent = userInfoData => {
