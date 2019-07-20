@@ -44,6 +44,7 @@ export default class Login extends Component {
                     console.log("login correcto");
                 })
                 .catch(() => {
+                    this.refs.toastLogin.show("Login Incorrecto", 2500);
                     console.log("login incorrecto");
                 });
         } else {

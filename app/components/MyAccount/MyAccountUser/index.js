@@ -16,7 +16,7 @@ export default class MyAccountClient extends Component {
         const { goToScreen } = this.props;
 
         return (
-            <View style={styles.viewBody}>
+            <View style={styles.viewUserAccount}>
                 <UserInfo />
             </View>
         );
@@ -24,7 +24,8 @@ export default class MyAccountClient extends Component {
 }
 
 const styles = StyleSheet.create({
-    // viewBody: {
-    //     backgroundColor: "#f2f2f2"
-    // }
+    viewUserAccount: {
+        height: "100%",
+        backgroundColor: "#f2f2f2"
+    }
 });

@@ -2,9 +2,7 @@ import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import UserNavigation from "./app/navigations/User";
 
-import fireBaseConfig from "./app/utils/FireBase";
-import * as firebase from "firebase";
-firebase.initializeApp(fireBaseConfig);
+import { firebaseApp } from "./app/utils/FireBase";
 
 export default class App extends React.Component {
     render() {

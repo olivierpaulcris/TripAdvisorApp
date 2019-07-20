@@ -3,6 +3,8 @@ import { StyleSheet, View, Text } from "react-native";
 import { ListItem } from "react-native-elements";
 import OverlayOneInput from "../../Elements/OverlayOneInput";
 import OverlayTwoInputs from "../../Elements/OverlayTwoInputs";
+import OverlayThreeInputs from "../../Elements/OverlayThreeInputs";
+import Toast, { DURATION } from "react-native-easy-toast";
 
 export default class UpdateUserInfo extends Component {
     constructor(props) {
@@ -50,7 +52,13 @@ export default class UpdateUserInfo extends Component {
                     iconColorRight: "#ccc",
                     iconNameLeft: "lock-reset",
                     iconColorLeft: "#ccc",
-                    onPress: () => console.log("click en cambiar password")
+                    onPress: () =>
+                        this.openOverlayThreeInputs(
+                            "Tu contraseña",
+                            "Nueva contraseña",
+                            "Repetir nueva contrañea",
+                            this.updateUserPassword
+                        )
                 }
             ]
         };
@@ -82,7 +90,7 @@ export default class UpdateUserInfo extends Component {
         console.log("estamos en userInfo");
         const emailOld = this.props.userInfo.email;
 
-        if (emailOld != newEmail) {
+        if (emailOld != newEmail && password) {
             this.state.updateUserEmail(newEmail, password);
         }
 
@@ -105,6 +113,61 @@ export default class UpdateUserInfo extends Component {
                     placeholderTwo={placeholderTwo}
                     inputValueOne={inputValueOne}
                     inputValueTwo=""
+                    isPassword={true}
+                    updateFunction={updateFunction}
+                />
+            )
+        });
+    };
+
+    updateUserPassword = async (
+        currentPassword,
+        newPassword,
+        repeatNewPassword
+    ) => {
+        console.log("currentPassword: " + currentPassword);
+        console.log("newPassword: " + newPassword);
+        console.log("repeatNewPassword: " + repeatNewPassword);
+
+        if (currentPassword && newPassword && repeatNewPassword) {
+            if (newPassword == repeatNewPassword) {
+                if (currentPassword == newPassword) {
+                    this.refs.toast.show(
+                        "La nueva contraseña no puede ser igual a la actual"
+                    );
+                } else {
+                    this.state.updateUserPassword(currentPassword, newPassword);
+                }
+            } else {
+                this.refs.toast.show(
+                    "Las nuevas contraseñas tienen que se iguales"
+                );
+            }
+        } else {
+            this.refs.toast.show("Tienes que rellenar todos los campos");
+        }
+
+        this.setState({
+            overlayComponent: null
+        });
+    };
+
+    openOverlayThreeInputs = (
+        placeholderOne,
+        placeholderTwo,
+        placeholderThree,
+        updateFunction
+    ) => {
+        this.setState({
+            overlayComponent: (
+                <OverlayThreeInputs
+                    isVisibleOverlay={true}
+                    placeholderOne={placeholderOne}
+                    placeholderTwo={placeholderTwo}
+                    placeholderThree={placeholderThree}
+                    inputValueOne=""
+                    inputValueTwo=""
+                    inputValueThree=""
                     isPassword={true}
                     updateFunction={updateFunction}
                 />
@@ -136,6 +199,16 @@ export default class UpdateUserInfo extends Component {
                     />
                 ))}
                 {overlayComponent}
+
+                <Toast
+                    ref="toast"
+                    position="center"
+                    positionValue={0}
+                    fadeInDuration={1000}
+                    fadeOutDuration={1000}
+                    opacity={0.8}
+                    textStyle={{ color: "#fff" }}
+                />
             </View>
         );
     }
