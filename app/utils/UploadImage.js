@@ -26,7 +26,8 @@ export const uploadImage = async (uri, nameImage, folder) => {
                 .storage()
                 .ref(`${folder}/${nameImage}`)
                 .getDownloadURL()
-                .then(() => {
+                .then(resolve => {
+                    console.log("image: ", resolve);
                     return resolve;
                 })
                 .catch(error => {

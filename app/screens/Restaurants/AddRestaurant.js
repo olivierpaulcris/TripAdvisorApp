@@ -1,6 +1,6 @@
 import React, { Component } from "react";
-import { StyleSheet, View } from "react-native";
-import { Icon, Image, Button } from "react-native-elements";
+import { StyleSheet, View, ActivityIndicator } from "react-native";
+import { Icon, Image, Button, Text, Overlay } from "react-native-elements";
 import { Permissions, ImagePicker } from "expo";
 import Toast, { DURATION } from "react-native-easy-toast";
 import { uploadImage } from "../../utils/UploadImage";
@@ -22,6 +22,7 @@ export default class AddRestaurant extends Component {
         super();
 
         this.state = {
+            loading: false,
             imageUriRestaurant: "",
             formData: {
                 name: "",
@@ -88,24 +89,78 @@ export default class AddRestaurant extends Component {
     };
 
     AddRestaurant = () => {
-        console.log("estamos en la funcion addRestaurant");
-        console.log(this.state);
-
         const { imageUriRestaurant } = this.state;
         const { name, city, address, description } = this.state.formData;
-        console.log("aqui termina");
-        console.log(imageUriRestaurant);
-        uploadImage(imageUriRestaurant, "fotos", "restaurante")
-            .then(resolve => {
-                console.log("todo correcto: ", resolve);
-            })
-            .catch(err => {
-                console.log(err);
-            });
+
+        if (imageUriRestaurant && name && city && address && description) {
+            this.setState({ loading: true });
+            console.log("Formlario relleno");
+
+            db.collection("restaurants")
+                .add({
+                    name,
+                    city,
+                    address,
+                    description,
+                    image: "",
+                    createAt: new Date()
+                })
+                .then(resolve => {
+                    console.log("restaurante añadido");
+                    const restaurantId = resolve.id;
+
+                    uploadImage(imageUriRestaurant, restaurantId, "restaurants")
+                        .then(resolve => {
+                            console.log("url: ", resolve);
+                            console.log("id: ", restaurantId);
+
+                            const restaurantRef = db
+                                .collection("restaurants")
+                                .doc(restaurantId);
+
+                            restaurantRef
+                                .update({ image: resolve })
+                                .then(() => {
+                                    this.refs.toast.show(
+                                        "Restaurante creado correctamente",
+                                        100,
+                                        () => {
+                                            this.props.navigation.goBack();
+                                        }
+                                    );
+                                })
+                                .catch(err => {
+                                    console.log(err);
+                                    this.refs.toast.show(
+                                        "Error de servidor intentelo mas tarde"
+                                    );
+                                });
+                        })
+                        .catch(err => {
+                            console.log(err);
+
+                            this.refs.toast.show(
+                                "Error de servidor intentelo mas tarde"
+                            );
+                        });
+                })
+                .catch(error => {
+                    console.log(err);
+
+                    this.refs.toast.show(
+                        "Error de servidor intentelo mas tarde"
+                    );
+                })
+                .finally(() => {
+                    this.setState({ loading: false });
+                });
+        } else {
+            this.refs.toast.show("Tienes que rellenar todos los campos");
+        }
     };
 
     render() {
-        const { imageUriRestaurant } = this.state;
+        const { imageUriRestaurant, loading } = this.state;
 
         return (
             <View style={styles.viewBody}>
@@ -139,6 +194,19 @@ export default class AddRestaurant extends Component {
                         buttonStyle={styles.btnAddRestaurant}
                     />
                 </View>
+                <Overlay
+                    overlayStyle={styles.overlayLoading}
+                    isVisible={loading}
+                    width="auto"
+                    height="auto"
+                >
+                    <View>
+                        <Text style={styles.overlayLoadingText}>
+                            Creando Restaurante
+                        </Text>
+                        <ActivityIndicator size="large" color="#00a680" />
+                    </View>
+                </Overlay>
                 <Toast
                     ref="toast"
                     position="bottom"
@@ -180,5 +248,13 @@ const styles = StyleSheet.create({
     btnAddRestaurant: {
         backgroundColor: "#00a680",
         margin: 20
+    },
+    overlayLoading: {
+        padding: 20
+    },
+    overlayLoadingText: {
+        color: "#00a680",
+        marginBottom: 20,
+        fontSize: 20
     }
 });
