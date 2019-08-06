@@ -18,8 +18,8 @@ import "firebase/firestore";
 const db = firebase.firestore(firebaseApp);
 
 export default class AddRestaurant extends Component {
-    constructor() {
-        super();
+    constructor(props) {
+        super(props);
 
         this.state = {
             loading: false,
@@ -125,6 +125,7 @@ export default class AddRestaurant extends Component {
                                         "Restaurante creado correctamente",
                                         100,
                                         () => {
+                                            this.props.navigation.state.params.loadRestaurants();
                                             this.props.navigation.goBack();
                                         }
                                     );
