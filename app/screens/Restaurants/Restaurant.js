@@ -30,7 +30,8 @@ export default class Restaurant extends Component {
             reviews: null,
             startReview: null,
             limitReviews: 5,
-            isLoading: true
+            isLoading: true,
+            rating: 0
         };
     }
 
@@ -80,7 +81,8 @@ export default class Restaurant extends Component {
 
                 this.props.navigation.navigate("AddReviewRestaurant", {
                     id,
-                    name
+                    name,
+                    loadReview: this.loadReviews
                 });
             }
         });
@@ -118,11 +120,11 @@ export default class Restaurant extends Component {
         } = this.props.navigation.state.params.restaurant.item.restaurant;
 
         let resultReviews = [];
+        let arrayRating = [];
 
         const reviews = db
             .collection("reviews")
-            .where("idRestaurant", "==", id)
-            .limit(limitReviews);
+            .where("idRestaurant", "==", id);
 
         return await reviews.get().then(response => {
             this.setState({
@@ -133,10 +135,25 @@ export default class Restaurant extends Component {
                 let review = doc.data();
 
                 resultReviews.push(review);
+
+                arrayRating.push(doc.data().rating);
             });
 
+            let numSum = 0;
+            console.log("nuevoo");
+            arrayRating.map(value => {
+                numSum = numSum + value;
+            });
+
+            console.log("numSum: ", numSum);
+
+            const countRating = arrayRating.length;
+            const resultRating = numSum / countRating;
+            const resultRatingFinish = resultRating ? resultRating : 0;
+
             this.setState({
-                reviews: resultReviews
+                reviews: resultReviews,
+                rating: resultRatingFinish
             });
         });
     };
@@ -164,17 +181,27 @@ export default class Restaurant extends Component {
     };
 
     renderRow = reviewData => {
-        const { title, review, rating, idUser, createAt } = reviewData.item;
+        const {
+            title,
+            review,
+            rating,
+            idUser,
+            createAt,
+            avatarUser
+        } = reviewData.item;
 
         const createReview = new Date(createAt.seconds * 1000);
 
+        const avatar = avatarUser
+            ? avatarUser
+            : "https://api.adorable.io/avatars/285/abott@adorable.png";
+
         return (
             <View style={styles.viewReview}>
-                <View style={styles.viewImage}>
+                <View style={styles.viewImageAvatar}>
                     <Avatar
                         source={{
-                            uri:
-                                "https://api.adorable.io/avatars/285/abott@adorable.png"
+                            uri: avatar
                         }}
                         size="large"
                         rounded
@@ -196,7 +223,7 @@ export default class Restaurant extends Component {
     };
 
     render() {
-        const { reviews } = this.state;
+        const { reviews, rating } = this.state;
 
         const {
             id,
@@ -234,7 +261,15 @@ export default class Restaurant extends Component {
                     </View>
 
                     <View style={styles.viewRestaurantBasicInfo}>
-                        <Text style={styles.nameRestaurant}>{name}</Text>
+                        <View style={{ flexDirection: "row" }}>
+                            <Text style={styles.nameRestaurant}>{name}</Text>
+                            <Rating
+                                style={{ position: "absolute", right: 0 }}
+                                imageSize={20}
+                                readonly
+                                startingValue={parseFloat(rating)}
+                            />
+                        </View>
                         <Text style={styles.descriptionRestaurant}>
                             {description}
                         </Text>
@@ -334,7 +369,7 @@ const styles = StyleSheet.create({
         borderBottomColor: "#e3e3e3",
         borderBottomWidth: 1
     },
-    viewImage: {
+    viewImageAvatar: {
         marginRight: 15
     },
     imageAvatarUser: {

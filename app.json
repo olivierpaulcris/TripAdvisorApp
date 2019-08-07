@@ -15,7 +15,7 @@
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#00a680"
     },
     "updates": {
       "fallbackToCacheTimeout": 0
@@ -27,6 +27,7 @@
       "supportsTablet": true
     },
     "android": {
+      "package": "com.restaurants.app",
       "permissions": [
         "CAMERA_ROLL"
       ]

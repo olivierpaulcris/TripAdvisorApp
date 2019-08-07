@@ -103,6 +103,9 @@ export default class AddRestaurant extends Component {
                     address,
                     description,
                     image: "",
+                    rating: 0,
+                    ratingTotal: 0,
+                    quantityVoting: 0,
                     createAt: new Date()
                 })
                 .then(resolve => {
